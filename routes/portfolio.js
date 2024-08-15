@@ -5,5 +5,6 @@ const auth = require("../middleware/auth");
 
 router.post('/buy', auth, portfolioController.addStock);
 router.post('/sell', auth, portfolioController.sellStock);
+router.get('/getPortfolio', auth, portfolioController.getPortfolio);
 
 module.exports = router;

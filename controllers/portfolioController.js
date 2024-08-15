@@ -77,3 +77,16 @@ exports.sellStock = async (req, res) => {
         res.status(500).json({ message: "An error occurred", error });
     }
 };
+
+//Get Portfolio of a user
+
+exports.getPortfolio = async (req, res) => {
+    const userId = req.userId
+    try {
+        const portfolio = await Portfolio.find({ userId });
+        res.status(200).json({ portfolio });
+
+    } catch (error) {
+        res.status(500).json({ message: "An error occurred", error });
+    }
+};
