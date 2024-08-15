@@ -3,11 +3,13 @@ const userRouter = require("./user");
 const watchlistRouter = require("./watchlist");
 const statesRouter = require("./states");
 const walletRouter = require("./wallet");
+const portfolioRouter = require("./portfolio");
 
 const router = express.Router();
 router.use('/user', userRouter);
 router.use('/watchlist', watchlistRouter);
 router.use('/states',statesRouter);
 router.use('/wallet', walletRouter);
+router.use('/portfolio', portfolioRouter);
 
 module.exports = router;
