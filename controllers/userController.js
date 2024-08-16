@@ -53,8 +53,17 @@ const login = async (req, res) => {
     res.send({ error: null, msg: "Logged In", token });
   };
 
+  const getUserProfile = async (req, res) => {
+    let userId = req.userId;
+    console.log(userId)
+    let user = await User.findById(userId);
+    if (!user) return res.send({ error: true, msg: "No User Found" });
+    res.send({ error: null, msg: "User Profile", user });
+  };
+
 module.exports ={
     register,
-    login
+    login,
+    getUserProfile
 }
 
