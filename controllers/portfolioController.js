@@ -1,5 +1,6 @@
 const Portfolio = require('../models/portfolio');
 const States = require('../models/states');
+const yahooFinance = require("yahoo-finance2").default;
 
 exports.addStock = async (req, res) => {
     const {stockPrice, quantity, ticker } = req.body;
@@ -80,11 +81,48 @@ exports.sellStock = async (req, res) => {
 
 //Get Portfolio of a user
 
+// exports.getPortfolio = async (req, res) => {
+//     const userId = req.userId
+//     try {
+//         const portfolio = await Portfolio.find({ userId });
+//         res.status(200).json({ portfolio });
+
+//     } catch (error) {
+//         res.status(500).json({ message: "An error occurred", error });
+//     }
+// };
+
+
 exports.getPortfolio = async (req, res) => {
-    const userId = req.userId
+    const userId = req.userId;
     try {
         const portfolio = await Portfolio.find({ userId });
-        res.status(200).json({ portfolio });
+
+        // Fetch the current price for each stock
+        const portfolioWithPrices = await Promise.all(
+            portfolio.map(async (item) => {
+                try {
+                    const quote = await yahooFinance.quote(item.ticker);
+                    const currentPrice = quote.regularMarketPrice || 0;
+                    return {
+                        ...item.toObject(),
+                        currentPrice,
+                        totalInvested: item.averagePrice * item.quantity,
+                        totalPrice: currentPrice * item.quantity,
+                    };
+                } catch (error) {
+                    console.error(`Failed to fetch quote for ${item.ticker}:`, error);
+                    return {
+                        ...item.toObject(),
+                        currentPrice: 0,
+                        totalInvested: item.averagePrice * item.quantity,
+                        totalPrice: 0,
+                    };
+                }
+            })
+        );
+
+        res.status(200).json({ portfolio: portfolioWithPrices });
 
     } catch (error) {
         res.status(500).json({ message: "An error occurred", error });
