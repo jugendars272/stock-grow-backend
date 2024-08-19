@@ -1,5 +1,6 @@
 const { Watchlist } = require("../models");
 const { User } = require("../models");
+const yahooFinance = require('yahoo-finance2').default;
 
 // API to add a ticker into watchlist
 const add = async (req, res) => {
@@ -29,21 +30,51 @@ const add = async (req, res) => {
     }
 };
 
-const getWatchlist = async (req, res) => {
-    try{
-        const {userId} = req;
-        const watchlist = await Watchlist.findOne({userId});
-        if(!watchlist){
-            return res.status(200).send({ error: false, msg: "Watchlist fetched successfully", list:[] });
-        }
-        return res.status(200).send({ error: true, msg: "Watchlist fetched successfully", list:watchlist.list });
-    }
-    catch(error){
-        return res.status(500).send({ error: true, msg: "Something went wrong" });
-    }
-}
 
-// API to delete a ticker from watchlist
+const getWatchlist = async (req, res) => {
+  try {
+    const { userId } = req;
+    const watchlist = await Watchlist.findOne({ userId });
+    if (!watchlist) {
+      return res.status(200).send({ error: false, msg: "Watchlist fetched successfully", list: [] });
+    }
+
+    // Fetch current stock price and percentage change for each ticker
+    const watchlistWithPrices = await Promise.all(
+      watchlist.list.map(async (ticker) => {
+        try {
+          const quote = await yahooFinance.quote(ticker);
+          const currentPrice = quote.regularMarketPrice || 0;
+          const percentageChange = quote.regularMarketChangePercent || 0;
+
+          return {
+            ticker,
+            currentPrice,
+            percentageChange,
+          };
+        } catch (error) {
+          console.error(`Error fetching data for ticker ${ticker}:`, error);
+          return {
+            ticker,
+            currentPrice: 0,
+            percentageChange: 0,
+          };
+        }
+      })
+    );
+
+    return res.status(200).send({
+      error: false,
+      msg: "Watchlist fetched successfully",
+      list: watchlistWithPrices,
+    });
+  } catch (error) {
+    console.error("Error fetching watchlist:", error);
+    return res.status(500).send({ error: true, msg: "Something went wrong" });
+  }
+};
+
+
 const deleteTicker = async (req, res) => {
     try {
         const { userId } = req;
