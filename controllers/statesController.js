@@ -1,4 +1,5 @@
 const {States} = require('../models');
+const {Transection} = require('../models');
 
 //Get states of a user
 exports.getStates = async(req,res) => {
@@ -20,3 +21,15 @@ exports.getStates = async(req,res) => {
     }
 }
 
+exports.getTransections = async(req, res) => {
+  try{
+    const userId = req.userId;
+
+    const transactions = await Transection.find({userId}).sort({_id: -1});
+    res.status(200).send(transactions);
+  }
+  catch(error){
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+}

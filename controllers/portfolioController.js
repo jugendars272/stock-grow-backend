@@ -1,7 +1,7 @@
 const Portfolio = require('../models/portfolio');
 const States = require('../models/states');
 const yahooFinance = require("yahoo-finance2").default;
-
+const {Transection} = require("../models");
 exports.addStock = async (req, res) => {
     const {stockPrice, quantity, ticker } = req.body;
     const userId = req.userId
@@ -34,7 +34,8 @@ exports.addStock = async (req, res) => {
             });
         }
         await portfolio.save();
-
+        const newTransaction = new Transection({userId, description:`Buy ${ticker}`, amount:stockPrice*quantity});
+         await newTransaction.save();
         res.status(200).json({ message: "Stock bought successfully", portfolio });
 
     } catch (error) {
@@ -71,7 +72,8 @@ exports.sellStock = async (req, res) => {
         } else {
             await portfolio.save();
         }
-
+        const newTransaction = new Transection({userId, description:`Sell ${ticker}`, amount:stockPrice*quantity});
+        await newTransaction.save();
         res.status(200).json({ message: "Stock sold successfully", profit });
 
     } catch (error) {

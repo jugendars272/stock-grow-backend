@@ -1,5 +1,6 @@
 const {States} = require("../models");
 const {Withdraw}  = require("../models");
+const {Transection} = require("../models");
 
 //Add into wallet
 exports.add = async(req, res) => {
@@ -19,6 +20,10 @@ exports.add = async(req, res) => {
         state.current += amount;
         await state.save();
       }
+         // Add transaction to the transaction table
+         const newTransaction = new Transection({userId, description:"Deposit", amount});
+         await newTransaction.save();
+
       res.status(200).send("Amount added successfully");
     }
     catch(err){
@@ -44,7 +49,8 @@ exports.withdraw = async(req, res) => {
       }
       const newWithdrawrRequest = new Withdraw({userId, amount, upiId});
       await newWithdrawrRequest.save();
-      
+      const newTransaction = new Transection({userId, description:"Withdraw", amount});
+         await newTransaction.save();
       res.status(200).send("Withdraw request successful");
     }
     catch(err){
