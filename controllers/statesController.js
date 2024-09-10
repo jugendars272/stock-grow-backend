@@ -1,5 +1,5 @@
 const {States} = require('../models');
-const {Transection} = require('../models');
+const Transaction= require('../models/transections');
 
 //Get states of a user
 exports.getStates = async(req,res) => {
@@ -25,7 +25,7 @@ exports.getTransections = async(req, res) => {
   try{
     const userId = req.userId;
 
-    const transactions = await Transection.find({userId}).sort({_id: -1});
+    const transactions = await Transaction.find({userId}).sort({_id: -1});
     res.status(200).send(transactions);
   }
   catch(error){
