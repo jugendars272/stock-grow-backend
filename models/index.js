@@ -4,6 +4,7 @@ const States = require('./states');
 const Withdraw = require('./withdraw');
 const Portfolio = require('./portfolio');
 const Transection = require('./transections');
+const Deposit = require('./deposite');
 
 module.exports = {
   User,
@@ -11,5 +12,6 @@ module.exports = {
   States,
   Withdraw,
   Portfolio,
-  Transection
+  Transection,
+  Deposit
 }
