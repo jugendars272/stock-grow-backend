@@ -18,9 +18,9 @@ const register = async (req, res) => {
    
     // creating new user
     const newUser = new User();
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    newUser.password = hashedPassword;
+    // const salt = await bcrypt.genSalt(10);
+    // const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    newUser.password = req.body.password;
     newUser.phone = req.body.phone;
     newUser.email = req.body.email
     newUser.name = req.body.name
