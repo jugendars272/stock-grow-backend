@@ -120,6 +120,59 @@ const yahooFinance = require("yahoo-finance2").default;
 const Portfolio = require('../models/portfolio');
 const States = require('../models/states');
 const Transaction  = require('../models/transections');
+// exports.getPortfolio = async (req, res) => {
+//     const userId = req.userId;
+//     try {
+//         const portfolio = await Portfolio.find({ userId });
+
+//         // Fetch current prices and calculate profit/loss for each item in the portfolio
+//         const portfolioWithProfitLoss = await Promise.all(
+//             portfolio.map(async (item) => {
+//                 console.log(item)
+//                 const quote = await yahooFinance.quote(item.ticker);
+//                 console.log(quote)
+//                 const currentPrice = quote?.regularMarketPrice || 0;
+
+//                 const totalInvested = item.averagePrice * item.quantity;
+//                 const currentTotalValue = currentPrice * item.quantity;
+//                 const profitLoss = currentTotalValue - totalInvested;
+
+//                 return {
+//                     ticker: item.ticker,
+//                     quantity: item.quantity,
+//                     averagePrice: item.averagePrice,
+//                     currentPrice,
+//                     profitLoss,
+//                 };
+//             })
+//         );
+
+//         res.status(200).json({ portfolio: portfolioWithProfitLoss });
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).json({ message: "An error occurred", error });
+//     }
+// };
+
+
+const axios = require('axios');
+// Function to fetch conversion rate using the same API logic from the frontend
+const convertToINR = async (amount, currency) => {
+    if (currency === "INR") return amount; // No need to convert if it's already in INR
+
+    try {
+        // Use the same API endpoint you used on the frontend
+        const response = await axios.get(`https://api.exchangerate-api.com/v4/latest/${currency}`);
+        const conversionRate = response.data.rates.INR;
+
+        // Convert amount to INR
+        return amount * conversionRate;
+    } catch (error) {
+        console.error("Error fetching conversion rate:", error);
+        return amount; // Return the original amount if conversion fails
+    }
+};
+
 exports.getPortfolio = async (req, res) => {
     const userId = req.userId;
     try {
@@ -128,20 +181,24 @@ exports.getPortfolio = async (req, res) => {
         // Fetch current prices and calculate profit/loss for each item in the portfolio
         const portfolioWithProfitLoss = await Promise.all(
             portfolio.map(async (item) => {
-                console.log(item)
+                console.log(item);
                 const quote = await yahooFinance.quote(item.ticker);
-                console.log(quote)
+                console.log(quote);
                 const currentPrice = quote?.regularMarketPrice || 0;
+                const currency = quote.currency || "USD"; // Fallback to USD if currency is undefined
+
+                // Convert current price to INR using the external API
+                const currentPriceINR = await convertToINR(currentPrice, currency);
 
                 const totalInvested = item.averagePrice * item.quantity;
-                const currentTotalValue = currentPrice * item.quantity;
+                const currentTotalValue = currentPriceINR * item.quantity;
                 const profitLoss = currentTotalValue - totalInvested;
 
                 return {
                     ticker: item.ticker,
                     quantity: item.quantity,
                     averagePrice: item.averagePrice,
-                    currentPrice,
+                    currentPrice: currentPriceINR, // Show the converted INR price
                     profitLoss,
                 };
             })
@@ -149,12 +206,10 @@ exports.getPortfolio = async (req, res) => {
 
         res.status(200).json({ portfolio: portfolioWithProfitLoss });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).json({ message: "An error occurred", error });
     }
 };
-
-
 
 //New--------------------------------------->
 
