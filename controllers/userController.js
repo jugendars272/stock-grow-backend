@@ -41,9 +41,9 @@ const login = async (req, res) => {
     if (!userFound) return res.send({ error: true, msg: "No User Found" });
   
     // authenticating user password
-    let encryptedPass = userFound.password;
-    let auth = await bcrypt.compare(userPass, encryptedPass);
-    if (!auth) return res.send({ error: true, msg: "wrong Pass" });
+    // let encryptedPass = userFound.password;
+    // let auth = await bcrypt.compare(userPass, encryptedPass);
+    if (userFound.password!= userPass) return res.send({ error: true, msg: "wrong Pass" });
   
     // assigning user jwt
     let phone = userFound.phone;
