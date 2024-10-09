@@ -61,9 +61,31 @@ const login = async (req, res) => {
     res.send({ error: null, msg: "User Profile", user });
   };
 
+   //reset password
+   const resetPassword = async (req, res) => {
+    let userEmail = req.body.email;
+    let userFound = await User.findOne({ email: userEmail });
+    if (!userFound) return res.send({ error: true, msg: "No User Found" });
+  
+    //check is previous password match, encreption is not required
+    let previousPassword = req.body.previousPassword;
+    let newPassword = req.body.newPassword;
+    const userPass = userFound.password;
+    if(userPass!=previousPassword){
+      return res.status(400).send({ error: true, msg: "Previous Password does not match" });
+    }
+    //update new password
+    userFound.password = newPassword;
+    await userFound.save();
+    res.status(200).send({ error: null, msg: "Password Reset Successful" });
+    
+  };
+
+
 module.exports ={
     register,
     login,
-    getUserProfile
+    getUserProfile,
+    resetPassword
 }
 

@@ -10,5 +10,6 @@ const upload = multer({ storage: storage });
 router.post("/register", userController.register);
 router.post("/login", userController.login);
 router.get("/profile", auth,userController.getUserProfile);
+router.post('/reset-password', userController.resetPassword);
 
 module.exports = router
