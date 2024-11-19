@@ -192,8 +192,10 @@ exports.getPortfolio = async (req, res) => {
 
                 const totalInvested = item.averagePrice * item.quantity;
                 const currentTotalValue = currentPriceINR * item.quantity;
-                const profitLoss = currentTotalValue - totalInvested;
-
+                let profitLoss = currentTotalValue - totalInvested;
+                if(item.positionType == "short"){
+                    profitLoss = totalInvested - currentTotalValue;
+                }
                 return {
                     ticker: item.ticker,
                     quantity: item.quantity,
